@@ -2,7 +2,9 @@ version: "3.7"
 
 services:
   controller001:
-    build: .
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
     image: kazono/kafka-kraft:3.6.1
     hostname: controller001
     container_name: controller001
@@ -30,7 +32,9 @@ services:
       KAFKA_SUPER_USERS: User:admin
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
   controller002:
-    build: .
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
     image: kazono/kafka-kraft:3.6.1
     hostname: controller002
     container_name: controller002
@@ -58,7 +62,9 @@ services:
       KAFKA_SUPER_USERS: User:admin
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
   controller003:
-    build: .
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
     image: kazono/kafka-kraft:3.6.1
     hostname: controller003
     container_name: controller003
@@ -87,7 +93,9 @@ services:
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
 
   broker001:
-    build: .
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
     image: kazono/kafka-kraft:3.6.1
     hostname: broker001
     container_name: broker001
@@ -125,7 +133,9 @@ services:
       - ./files/props/admin.properties:/opt/kafka/config/admin.properties
       - ./files/jaas/kafka_jaas.conf:/opt/kafka/config/kafka_jaas.conf
   broker002:
-    build: .
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
     image: kazono/kafka-kraft:3.6.1
     hostname: broker002
     container_name: broker002
@@ -163,7 +173,9 @@ services:
       - ./files/props/admin.properties:/opt/kafka/config/admin.properties
       - ./files/jaas/kafka_jaas.conf:/opt/kafka/config/kafka_jaas.conf
   broker003:
-    build: .
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
     image: kazono/kafka-kraft:3.6.1
     hostname: broker003
     container_name: broker003
@@ -202,13 +214,29 @@ services:
       - ./files/jaas/kafka_jaas.conf:/opt/kafka/config/kafka_jaas.conf
 
   cli:
-    build: .
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
     image: kazono/kafka-kraft:3.6.1
     hostname: cli
     container_name: cli
     tty: true
     volumes:
       - ./files/props/client.properties:/opt/kafka/config/client.properties
+
+  terraform-cli:
+    build:
+      context: .
+      dockerfile: terraform.Dockerfile
+    image: kazono/terraform:1.5.7
+    hostname: terraform-cli
+    container_name: terraform-cli
+    tty: true
+    volumes:
+      - ./samples/terraform:/root/sample
+      - ./files/certs/root-ca/ca.crt:/tmp/ca.crt
+      - ./files/certs/terraform/terraform-client.crt:/tmp/terraform-client.crt
+      - ./files/certs/terraform/terraform-client.key:/tmp/terraform-client.key
 
   kafka-ui:
     container_name: kafka-ui
