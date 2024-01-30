@@ -4,6 +4,9 @@ KAFKA_HOME=/opt/kafka
 KRAFT_CONFIG_PATH=$KAFKA_HOME/config/kraft
 EXCLUSIONS="|KAFKA_VERSION|KAFKA_HOME|KAFKA_DEBUG|KAFKA_GC_LOG_OPTS|KAFKA_HEAP_OPTS|KAFKA_JMX_OPTS|KAFKA_LOG4J_OPTS|KAFKA_JVM_PERFORMANCE_OPTS|KAFKA_LOG|KAFKA_OPTS|"
 
+# if you want to generate another cluster uuid, please run `(/opt/kafka/bin/kafka-storage.sh random-uuid`
+CLUSTER_UUID=wKOmCkwzTx2Th6Ymu_S8wQ
+
 config_updater() {
   echo "==> Applying environment variables..."
   for VAR in $(env)
@@ -38,25 +41,25 @@ config_updater_handler() {
 
 if [ "$KAFKA_PROCESS_ROLES" == "broker,controller" ]; then
   echo "==> This container's role is $KAFKA_PROCESS_ROLES"
-  echo "==> Set kafka properties path."
   CONFIG=$KRAFT_CONFIG_PATH/server.properties
-  echo "==> ✅ Path = $CONFIG"
-
   config_updater
 elif [ "$KAFKA_PROCESS_ROLES" == "controller" ]; then
   echo "==> This container's role is $KAFKA_PROCESS_ROLES"
-  echo "==> Set kafka properties path."
   CONFIG=$KRAFT_CONFIG_PATH/controller.properties
-  echo "==> ✅ Path = $CONFIG"
-
   config_updater
 else
   echo "==> This container's role is $KAFKA_PROCESS_ROLES"
-  echo "==> Set kafka properties path."
   CONFIG=$KRAFT_CONFIG_PATH/broker.properties
-  echo "==> ✅ Path = $CONFIG"
-
   config_updater
 fi
 
-# exec "$KAFKA_HOME/bin/kafka-server-start.sh" -daemon $CONFIG
+echo ""
+echo "==> Kafka storage setup."
+# Initialize kafka storage and create scram user same time.
+$KAFKA_HOME/bin/kafka-storage.sh format --cluster-id $CLUSTER_UUID --config $CONFIG --ignore-formatted --add-scram 'SCRAM-SHA-256=[name=admin,password=admin-secret]'
+echo "==> ✅ Kafka storage setup completed."
+
+echo ""
+echo "==> Start kafka process (process.roles=$KAFKA_PROCESS_ROLES)."
+exec "$KAFKA_HOME/bin/kafka-server-start.sh" $CONFIG
+echo "==> Completed"
