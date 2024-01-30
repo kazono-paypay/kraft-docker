@@ -6,13 +6,11 @@ services:
     image: kazono/kafka-kraft:3.6.1
     hostname: controller001
     container_name: controller001
-    privileged: true
-    tty: true
     environment:
       KAFKA_PROCESS_ROLES: controller
       KAFKA_NODE_ID: 1
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
-      # settings for SASL/SSL (SCRAM)
+      # settings for SASL/SSL (PLAIN)
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:SASL_SSL
       KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
@@ -31,20 +29,16 @@ services:
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_SUPER_USERS: User:admin
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
-    volumes:
-      - ./bin/setup.sh:/var/tmp/setup.sh
   controller002:
     build: .
     image: kazono/kafka-kraft:3.6.1
     hostname: controller002
     container_name: controller002
-    privileged: true
-    tty: true
     environment:
       KAFKA_PROCESS_ROLES: controller
       KAFKA_NODE_ID: 2
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
-      # settings for SASL/SSL (SCRAM)
+      # settings for SASL/SSL (PLAIN)
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:SASL_SSL
       KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
@@ -63,20 +57,16 @@ services:
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_SUPER_USERS: User:admin
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
-    volumes:
-      - ./bin/setup.sh:/var/tmp/setup.sh
   controller003:
     build: .
     image: kazono/kafka-kraft:3.6.1
     hostname: controller003
     container_name: controller003
-    privileged: true
-    tty: true
     environment:
       KAFKA_PROCESS_ROLES: controller
       KAFKA_NODE_ID: 3
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
-      # settings for SASL/SSL (SCRAM)
+      # settings for SASL/SSL (PLAIN)
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:SASL_SSL
       KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
@@ -95,16 +85,16 @@ services:
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_SUPER_USERS: User:admin
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
-    volumes:
-      - ./bin/setup.sh:/var/tmp/setup.sh
 
   broker001:
     build: .
     image: kazono/kafka-kraft:3.6.1
     hostname: broker001
     container_name: broker001
-    privileged: true
-    tty: true
+    depends_on:
+      - controller001
+      - controller002
+      - controller003
     environment:
       KAFKA_PROCESS_ROLES: broker
       KAFKA_NODE_ID: 4
@@ -132,7 +122,6 @@ services:
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
       KAFKA_OPTS: -Djava.security.auth.login.config=/opt/kafka/config/kafka_jaas.conf
     volumes:
-      - ./bin/setup.sh:/var/tmp/setup.sh
       - ./files/props/admin.properties:/opt/kafka/config/admin.properties
       - ./files/jaas/kafka_jaas.conf:/opt/kafka/config/kafka_jaas.conf
   broker002:
@@ -140,8 +129,10 @@ services:
     image: kazono/kafka-kraft:3.6.1
     hostname: broker002
     container_name: broker002
-    privileged: true
-    tty: true
+    depends_on:
+      - controller001
+      - controller002
+      - controller003
     environment:
       KAFKA_PROCESS_ROLES: broker
       KAFKA_NODE_ID: 5
@@ -169,7 +160,6 @@ services:
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
       KAFKA_OPTS: -Djava.security.auth.login.config=/opt/kafka/config/kafka_jaas.conf
     volumes:
-      - ./bin/setup.sh:/var/tmp/setup.sh
       - ./files/props/admin.properties:/opt/kafka/config/admin.properties
       - ./files/jaas/kafka_jaas.conf:/opt/kafka/config/kafka_jaas.conf
   broker003:
@@ -177,8 +167,10 @@ services:
     image: kazono/kafka-kraft:3.6.1
     hostname: broker003
     container_name: broker003
-    privileged: true
-    tty: true
+    depends_on:
+      - controller001
+      - controller002
+      - controller003
     environment:
       KAFKA_PROCESS_ROLES: broker
       KAFKA_NODE_ID: 6
@@ -206,7 +198,6 @@ services:
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: true
       KAFKA_OPTS: -Djava.security.auth.login.config=/opt/kafka/config/kafka_jaas.conf
     volumes:
-      - ./bin/setup.sh:/var/tmp/setup.sh
       - ./files/props/admin.properties:/opt/kafka/config/admin.properties
       - ./files/jaas/kafka_jaas.conf:/opt/kafka/config/kafka_jaas.conf
 
@@ -215,10 +206,39 @@ services:
     image: kazono/kafka-kraft:3.6.1
     hostname: cli
     container_name: cli
-    privileged: true
     tty: true
     volumes:
       - ./files/props/client.properties:/opt/kafka/config/client.properties
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    restart: always
+    depends_on:
+      - broker001
+      - broker002
+      - broker003
+    environment:
+      TZ: Asia/Tokyo
+      # settings for access brokers using PLAINTEXT
+      KAFKA_CLUSTERS_0_NAME: via-plaintext-port
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker001:9091,broker002:9091,broker003:9091
+      # settings for access brokers using SASL/SSL (SCRAM)
+      KAFKA_CLUSTERS_1_NAME: via-sasl-ssl-port
+      KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: broker001:9092,broker002:9092,broker003:9092
+      KAFKA_CLUSTERS_1_PROPERTIES_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_CLUSTERS_1_PROPERTIES_SASL_MECHANISM: SCRAM-SHA-256
+      KAFKA_CLUSTERS_1_PROPERTIES_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule required username='admin' password='admin-secret';
+      KAFKA_CLUSTERS_1_PROPERTIES_SSL_KEYSTORE_LOCATION: /server.keystore.jks
+      KAFKA_CLUSTERS_1_PROPERTIES_SSL_KEYSTORE_PASSWORD: changeit
+      KAFKA_CLUSTERS_1_SSL_TRUSTSTORELOCATION: /server.truststore.jks
+      KAFKA_CLUSTERS_1_SSL_TRUSTSTOREPASSWORD: changeit
+      KAFKA_CLUSTERS_1_PROPERTIES_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
+    volumes:
+      - ./files/certs/kafka-ui/server.keystore.jks:/server.keystore.jks
+      - ./files/certs/kafka-ui/server.truststore.jks:/server.truststore.jks
 
 networks:
   default:

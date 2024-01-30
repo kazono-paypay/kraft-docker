@@ -34,12 +34,13 @@ RUN wget https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSI
     && mkdir -p /etc/private/ssl
 
 # copy certs and private key for creating JKS
-COPY ./files/certs/ca.crt /etc/private/ssl/
-COPY ./files/certs/ca.key /etc/private/ssl/
+COPY ./files/certs/root-ca/ca.crt /etc/private/ssl/
+COPY ./files/certs/root-ca/ca.key /etc/private/ssl/
 COPY ./bin/create-certs.sh /etc/private/ssl/
+COPY ./bin/start-kafka.sh /usr/bin/start-kafka.sh
 
 # generate JKS for enabling SSL/TLS
 RUN cd /etc/private/ssl \
     && sh create-certs.sh
 
-CMD ["/sbin/init"]
+CMD ["start-kafka.sh"]
