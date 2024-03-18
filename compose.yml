@@ -5,10 +5,11 @@ services:
     build:
       context: .
       dockerfile: kafka.Dockerfile
-    image: kazono/kafka-kraft:3.6.1
+    image: kazono/kafka-kraft:3.7.0
     hostname: controller001
     container_name: controller001
     environment:
+      NO_START: false
       KAFKA_PROCESS_ROLES: controller
       KAFKA_NODE_ID: 1
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
@@ -26,7 +27,7 @@ services:
       KAFKA_SSL_KEY_PASSWORD: changeit
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
       KAFKA_SSL_SECURE_RANDOM_IMPLEMENTATION: SHA1PRNG
-      KAFKA_LISTENER_NAME_CONTROLLER_SSL_CLIENT_AUTH: required
+      # KAFKA_LISTENER_NAME_CONTROLLER_SSL_CLIENT_AUTH: required
       # settings for authorizer
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_SUPER_USERS: User:admin
@@ -35,10 +36,11 @@ services:
     build:
       context: .
       dockerfile: kafka.Dockerfile
-    image: kazono/kafka-kraft:3.6.1
+    image: kazono/kafka-kraft:3.7.0
     hostname: controller002
     container_name: controller002
     environment:
+      NO_START: false
       KAFKA_PROCESS_ROLES: controller
       KAFKA_NODE_ID: 2
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
@@ -56,7 +58,7 @@ services:
       KAFKA_SSL_KEY_PASSWORD: changeit
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
       KAFKA_SSL_SECURE_RANDOM_IMPLEMENTATION: SHA1PRNG
-      KAFKA_LISTENER_NAME_CONTROLLER_SSL_CLIENT_AUTH: required
+      # KAFKA_LISTENER_NAME_CONTROLLER_SSL_CLIENT_AUTH: required
       # settings for authorizer
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_SUPER_USERS: User:admin
@@ -65,10 +67,11 @@ services:
     build:
       context: .
       dockerfile: kafka.Dockerfile
-    image: kazono/kafka-kraft:3.6.1
+    image: kazono/kafka-kraft:3.7.0
     hostname: controller003
     container_name: controller003
     environment:
+      NO_START: false
       KAFKA_PROCESS_ROLES: controller
       KAFKA_NODE_ID: 3
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
@@ -86,7 +89,7 @@ services:
       KAFKA_SSL_KEY_PASSWORD: changeit
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
       KAFKA_SSL_SECURE_RANDOM_IMPLEMENTATION: SHA1PRNG
-      KAFKA_LISTENER_NAME_CONTROLLER_SSL_CLIENT_AUTH: required
+      # KAFKA_LISTENER_NAME_CONTROLLER_SSL_CLIENT_AUTH: required
       # settings for authorizer
       KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
       KAFKA_SUPER_USERS: User:admin
@@ -96,7 +99,7 @@ services:
     build:
       context: .
       dockerfile: kafka.Dockerfile
-    image: kazono/kafka-kraft:3.6.1
+    image: kazono/kafka-kraft:3.7.0
     hostname: broker001
     container_name: broker001
     depends_on:
@@ -104,6 +107,7 @@ services:
       - controller002
       - controller003
     environment:
+      NO_START: false
       KAFKA_PROCESS_ROLES: broker
       KAFKA_NODE_ID: 4
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
@@ -115,7 +119,7 @@ services:
       KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
-      KAFKA_LISTENER_NAME_CONTROLLER_PLAIN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret" user_admin="admin-secret";
+      # KAFKA_LISTENER_NAME_CONTROLLER_PLAIN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret" user_admin="admin-secret";
       # settings for SSL/TLS communication
       KAFKA_SSL_TRUSTSTORE_LOCATION: /etc/private/ssl/server.truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: changeit
@@ -136,7 +140,7 @@ services:
     build:
       context: .
       dockerfile: kafka.Dockerfile
-    image: kazono/kafka-kraft:3.6.1
+    image: kazono/kafka-kraft:3.7.0
     hostname: broker002
     container_name: broker002
     depends_on:
@@ -144,6 +148,7 @@ services:
       - controller002
       - controller003
     environment:
+      NO_START: false
       KAFKA_PROCESS_ROLES: broker
       KAFKA_NODE_ID: 5
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
@@ -155,7 +160,7 @@ services:
       KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
-      KAFKA_LISTENER_NAME_CONTROLLER_PLAIN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret" user_admin="admin-secret";
+      # KAFKA_LISTENER_NAME_CONTROLLER_PLAIN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret" user_admin="admin-secret";
       # settings for SSL/TLS communication
       KAFKA_SSL_TRUSTSTORE_LOCATION: /etc/private/ssl/server.truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: changeit
@@ -176,7 +181,7 @@ services:
     build:
       context: .
       dockerfile: kafka.Dockerfile
-    image: kazono/kafka-kraft:3.6.1
+    image: kazono/kafka-kraft:3.7.0
     hostname: broker003
     container_name: broker003
     depends_on:
@@ -184,6 +189,7 @@ services:
       - controller002
       - controller003
     environment:
+      NO_START: false
       KAFKA_PROCESS_ROLES: broker
       KAFKA_NODE_ID: 6
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
@@ -195,7 +201,7 @@ services:
       KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
       KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
-      KAFKA_LISTENER_NAME_CONTROLLER_PLAIN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret" user_admin="admin-secret";
+      # KAFKA_LISTENER_NAME_CONTROLLER_PLAIN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret" user_admin="admin-secret";
       # settings for SSL/TLS communication
       KAFKA_SSL_TRUSTSTORE_LOCATION: /etc/private/ssl/server.truststore.jks
       KAFKA_SSL_TRUSTSTORE_PASSWORD: changeit
@@ -217,7 +223,7 @@ services:
     build:
       context: .
       dockerfile: kafka.Dockerfile
-    image: kazono/kafka-kraft:3.6.1
+    image: kazono/kafka-kraft:3.7.0
     hostname: cli
     container_name: cli
     tty: true

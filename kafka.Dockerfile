@@ -1,6 +1,6 @@
 FROM amazonlinux:2023
 
-ARG KAFKA_VERSION=3.6.1
+ARG KAFKA_VERSION=3.7.0
 ARG SCALA_VERSION=2.13
 
 # install necessary packages

@@ -1,0 +1,130 @@
+version: "3.7"
+
+services:
+  controller001:
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
+    image: kazono/kafka-kraft:3.7.0
+    hostname: controller001
+    container_name: controller001
+    tty: true
+    environment:
+      NO_START: true
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
+  controller002:
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
+    image: kazono/kafka-kraft:3.7.0
+    hostname: controller002
+    container_name: controller002
+    tty: true
+    environment:
+      NO_START: true
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
+  controller003:
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
+    image: kazono/kafka-kraft:3.7.0
+    hostname: controller003
+    container_name: controller003
+    tty: true
+    environment:
+      NO_START: true
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
+
+  broker001:
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
+    image: kazono/kafka-kraft:3.7.0
+    hostname: broker001
+    container_name: broker001
+    depends_on:
+      - controller001
+      - controller002
+      - controller003
+    tty: true
+    environment:
+      NO_START: true
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_NODE_ID: 4
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
+      KAFKA_LISTENERS: BROKER://broker001:9092
+      KAFKA_ADVERTISED_LISTENERS: BROKER://broker001:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+  broker002:
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
+    image: kazono/kafka-kraft:3.7.0
+    hostname: broker002
+    container_name: broker002
+    depends_on:
+      - controller001
+      - controller002
+      - controller003
+    tty: true
+    environment:
+      NO_START: true
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_NODE_ID: 5
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
+      # KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093
+      KAFKA_LISTENERS: BROKER://broker002:9092
+      KAFKA_ADVERTISED_LISTENERS: BROKER://broker002:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+  broker003:
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
+    image: kazono/kafka-kraft:3.7.0
+    hostname: broker003
+    container_name: broker003
+    depends_on:
+      - controller001
+      - controller002
+      - controller003
+    tty: true
+    environment:
+      NO_START: true
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_NODE_ID: 6
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093,2\@controller002:9093,3\@controller003:9093
+      # KAFKA_CONTROLLER_QUORUM_VOTERS: 1\@controller001:9093
+      KAFKA_LISTENERS: BROKER://broker003:9092
+      KAFKA_ADVERTISED_LISTENERS: BROKER://broker003:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+
+  cli:
+    build:
+      context: .
+      dockerfile: kafka.Dockerfile
+    image: kazono/kafka-kraft:3.7.0
+    hostname: cli
+    container_name: cli
+    tty: true
+    volumes:
+      - ./files/props/client.properties:/opt/kafka/config/client.properties
+      - ./files/props/producer.properties:/opt/kafka/config/producer.properties
+
+networks:
+  default:
+    name: dev.local.co.jp

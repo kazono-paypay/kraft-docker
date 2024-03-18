@@ -67,7 +67,14 @@ if [ -n "$KAFKA_PROCESS_ROLES" ]; then
 
   config_updater
   setup_kafka_storage
-  start_kafka
+
+  if "$NO_START"; then
+    echo ""
+    echo "Not start kafka processes. Only update properties."
+    /bin/bash
+  else
+    start_kafka
+  fi
 
 else
   echo "This container does not set KAFKA_PROCESS_ROLES to env."
